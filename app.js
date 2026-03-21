@@ -121,8 +121,20 @@
     let refreshTimer = null;
 
     async function fetchGames(date) {
-        const url = `${API_BASE}/${dateToApi(date)}/all-conf`;
-        const res = await fetch(url);
+        const ncaaUrl = `${API_BASE}/${dateToApi(date)}/all-conf`;
+
+        // Try allorigins.win CORS proxy first
+        try {
+            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(ncaaUrl)}`);
+            if (res.ok) {
+                const wrapper = await res.json();
+                const data = JSON.parse(wrapper.contents);
+                return data.games || [];
+            }
+        } catch (_) { /* fall through to backup */ }
+
+        // Fallback: corsproxy.io
+        const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(ncaaUrl)}`);
         if (!res.ok) return [];
         const data = await res.json();
         return data.games || [];
