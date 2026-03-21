@@ -85,94 +85,174 @@
             board.appendChild(cell);
         }
     }
-    // --- Schedule Section ---
-    const SCHEDULE = [
-        {
-            date: 'March 21',
-            label: 'Second Round',
-            games: [
-                { seed1: 1, team1: 'Michigan', score1: 95, seed2: 9, team2: 'Saint Louis', score2: 72, network: 'CBS', status: 'final' },
-                { seed1: 3, team1: 'Michigan State', score1: 77, seed2: 6, team2: 'Louisville', score2: 69, network: 'CBS', status: 'final' },
-                { seed1: 1, team1: 'Duke', seed2: 9, team2: 'TCU', time: '5:15 PM ET', network: 'CBS', status: 'upcoming' },
-                { seed1: 2, team1: 'Houston', seed2: 10, team2: 'Texas A&M', time: '6:10 PM ET', network: 'TNT', status: 'upcoming' },
-                { seed1: 3, team1: 'Gonzaga', seed2: 11, team2: 'Texas', time: '7:10 PM ET', network: 'TBS', status: 'upcoming' },
-                { seed1: 3, team1: 'Illinois', seed2: 11, team2: 'VCU', time: '7:50 PM ET', network: 'CBS', status: 'upcoming' },
-                { seed1: 4, team1: 'Nebraska', seed2: 5, team2: 'Vanderbilt', time: '8:45 PM ET', network: 'TNT', status: 'upcoming' },
-                { seed1: 4, team1: 'Arkansas', seed2: 12, team2: 'High Point', time: '9:45 PM ET', network: 'TBS', status: 'upcoming' },
-            ]
-        },
-        {
-            date: 'March 22',
-            label: 'Second Round',
-            games: [
-                { seed1: 7, team1: 'Miami', seed2: 2, team2: 'Purdue', time: '12:10 PM ET', network: 'CBS', status: 'upcoming' },
-                { seed1: 7, team1: 'Kentucky', seed2: 2, team2: 'Iowa State', time: '2:45 PM ET', network: 'CBS', status: 'upcoming' },
-                { seed1: 5, team1: "St. John's", seed2: 4, team2: 'Kansas', time: '5:15 PM ET', network: 'CBS', status: 'upcoming' },
-                { seed1: 6, team1: 'Tennessee', seed2: 3, team2: 'Virginia', time: '6:10 PM ET', network: 'TNT', status: 'upcoming' },
-                { seed1: 9, team1: 'Iowa', seed2: 1, team2: 'Florida', time: '7:10 PM ET', network: 'TBS', status: 'upcoming' },
-                { seed1: 9, team1: 'Utah State', seed2: 1, team2: 'Arizona', time: '7:50 PM ET', network: 'truTV', status: 'upcoming' },
-                { seed1: 7, team1: 'UCLA', seed2: 2, team2: 'UConn', time: '8:45 PM ET', network: 'TNT', status: 'upcoming' },
-                { seed1: 5, team1: 'Texas Tech', seed2: 4, team2: 'Alabama', time: '9:45 PM ET', network: 'TBS', status: 'upcoming' },
-            ]
-        }
+    // --- Schedule Section (Live API) ---
+    const API_BASE = 'https://ncaa-api.henrygd.me/scoreboard/basketball-men/d1';
+
+    const ROUND_MAP = [
+        { dates: [[3,20],[3,21]], label: 'Second Round' },
+        { dates: [[3,22],[3,23]], label: 'Second Round' },
+        { dates: [[3,27],[3,28]], label: 'Sweet 16' },
+        { dates: [[3,29],[3,30]], label: 'Elite 8' },
+        { dates: [[4,5],[4,6]], label: 'Final Four' },
+        { dates: [[4,7]], label: 'National Championship' },
     ];
 
-    let currentDayIndex = 0;
+    function getRoundLabel(date) {
+        const m = date.getMonth() + 1;
+        const d = date.getDate();
+        for (const round of ROUND_MAP) {
+            if (round.dates.some(([rm, rd]) => rm === m && rd === d)) return round.label;
+        }
+        return 'NCAA Tournament';
+    }
 
-    function renderSchedule() {
+    function formatDateNice(date) {
+        return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function dateToApi(date) {
+        return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())}`;
+    }
+
+    let currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    let refreshTimer = null;
+
+    async function fetchGames(date) {
+        const url = `${API_BASE}/${dateToApi(date)}/all-conf`;
+        const res = await fetch(url);
+        if (!res.ok) return [];
+        const data = await res.json();
+        return data.games || [];
+    }
+
+    function renderGame(game) {
+        const home = game.home;
+        const away = game.away;
+        const state = game.gameState;
+
+        if (state === 'final') {
+            const homeScore = parseInt(home.score) || 0;
+            const awayScore = parseInt(away.score) || 0;
+            const homeWin = homeScore > awayScore;
+            let html = `<div class="sched-game final">`;
+            html += `<span class="sched-team ${awayWin(homeWin, false)}"><span class="seed">${away.seed ? '(' + away.seed + ')' : ''}</span> ${away.names.short} <span class="score">${away.score}</span></span>`;
+            html += `<span class="sched-team ${awayWin(homeWin, true)}"><span class="seed">${home.seed ? '(' + home.seed + ')' : ''}</span> ${home.names.short} <span class="score">${home.score}</span></span>`;
+            html += `<span class="sched-status-label final-label">Final</span>`;
+            html += `</div>`;
+            return html;
+        }
+
+        if (state === 'live') {
+            const period = game.currentPeriod || '';
+            const clock = game.contestClock || '';
+            let html = `<div class="sched-game live">`;
+            html += `<span class="sched-team"><span class="seed">${away.seed ? '(' + away.seed + ')' : ''}</span> ${away.names.short} <span class="score">${away.score || 0}</span></span>`;
+            html += `<span class="sched-team"><span class="seed">${home.seed ? '(' + home.seed + ')' : ''}</span> ${home.names.short} <span class="score">${home.score || 0}</span></span>`;
+            html += `<span class="sched-live-info"><span class="live-dot"></span> LIVE — ${period} ${clock}</span>`;
+            html += `</div>`;
+            return html;
+        }
+
+        // pre
+        let html = `<div class="sched-game upcoming">`;
+        html += `<span class="sched-team"><span class="seed">${away.seed ? '(' + away.seed + ')' : ''}</span> ${away.names.short}</span>`;
+        html += `<span class="sched-vs">vs</span>`;
+        html += `<span class="sched-team"><span class="seed">${home.seed ? '(' + home.seed + ')' : ''}</span> ${home.names.short}</span>`;
+        html += `<span class="sched-time">${game.startTime || 'TBD'}</span>`;
+        html += `</div>`;
+        return html;
+    }
+
+    function awayWin(homeWin, isHome) {
+        if (isHome) return homeWin ? 'win' : 'loss';
+        return homeWin ? 'loss' : 'win';
+    }
+
+    async function loadSchedule() {
         const container = document.getElementById('schedule');
-        const day = SCHEDULE[currentDayIndex];
+        const dateStr = formatDateNice(currentDate);
+        const roundLabel = getRoundLabel(currentDate);
 
-        const finals = day.games.filter(g => g.status === 'final');
-        const upcoming = day.games.filter(g => g.status === 'upcoming');
+        // Show loading with nav intact
+        let html = `<div class="sched">`;
+        html += `<div class="sched-nav">`;
+        html += `<button class="sched-btn" id="prevDay">&larr; Prev</button>`;
+        html += `<div class="sched-title"><span class="sched-date">${dateStr}</span><span class="sched-round">${roundLabel}</span></div>`;
+        html += `<button class="sched-btn" id="nextDay">Next &rarr;</button>`;
+        html += `</div>`;
+        html += `<div class="sched-loading">Loading games...</div>`;
+        html += `</div>`;
+        container.innerHTML = html;
+        attachNavListeners();
+
+        try {
+            const games = await fetchGames(currentDate);
+            renderGames(games, dateStr, roundLabel);
+        } catch (e) {
+            renderGames([], dateStr, roundLabel, 'Could not load games. Check your connection.');
+        }
+
+        // Auto-refresh every 30s
+        clearInterval(refreshTimer);
+        refreshTimer = setInterval(async () => {
+            try {
+                const games = await fetchGames(currentDate);
+                renderGames(games, formatDateNice(currentDate), getRoundLabel(currentDate));
+            } catch (_) { /* silent fail on refresh */ }
+        }, 30000);
+    }
+
+    function renderGames(games, dateStr, roundLabel, error) {
+        const container = document.getElementById('schedule');
+
+        const finals = games.filter(g => g.gameState === 'final');
+        const live = games.filter(g => g.gameState === 'live');
+        const pre = games.filter(g => g.gameState === 'pre');
 
         let html = `<div class="sched">`;
         html += `<div class="sched-nav">`;
-        html += `<button class="sched-btn" id="prevDay" ${currentDayIndex === 0 ? 'disabled' : ''}>&larr; Prev</button>`;
-        html += `<div class="sched-title"><span class="sched-date">${day.date}</span><span class="sched-round">${day.label}</span></div>`;
-        html += `<button class="sched-btn" id="nextDay" ${currentDayIndex === SCHEDULE.length - 1 ? 'disabled' : ''}>Next &rarr;</button>`;
+        html += `<button class="sched-btn" id="prevDay">&larr; Prev</button>`;
+        html += `<div class="sched-title"><span class="sched-date">${dateStr}</span><span class="sched-round">${roundLabel}</span></div>`;
+        html += `<button class="sched-btn" id="nextDay">Next &rarr;</button>`;
         html += `</div>`;
 
-        if (finals.length) {
-            html += `<h3 class="sched-heading">Results</h3>`;
-            html += `<div class="sched-grid">`;
-            finals.forEach(g => {
-                const w1 = g.score1 > g.score2;
-                const note = g.note ? ` <span class="sched-ot">(${g.note})</span>` : '';
-                html += `<div class="sched-game final">`;
-                html += `<span class="sched-team ${w1 ? 'win' : 'loss'}"><span class="seed">(${g.seed1})</span> ${g.team1} <span class="score">${g.score1}</span></span>`;
-                html += `<span class="sched-team ${w1 ? 'loss' : 'win'}"><span class="seed">(${g.seed2})</span> ${g.team2} <span class="score">${g.score2}</span></span>`;
-                if (note) html += `<span class="sched-note">${note}</span>`;
-                html += `</div>`;
-            });
-            html += `</div>`;
-        }
-
-        if (upcoming.length) {
-            html += `<h3 class="sched-heading">${finals.length ? 'Tonight' : 'Games'}</h3>`;
-            html += `<div class="sched-grid">`;
-            upcoming.forEach(g => {
-                const net = g.network ? ` <span class="sched-net">${g.network}</span>` : '';
-                html += `<div class="sched-game upcoming">`;
-                html += `<span class="sched-team"><span class="seed">(${g.seed1})</span> ${g.team1}</span>`;
-                html += `<span class="sched-vs">vs</span>`;
-                html += `<span class="sched-team"><span class="seed">(${g.seed2})</span> ${g.team2}</span>`;
-                html += `<span class="sched-time">${g.time}${net}</span>`;
-                html += `</div>`;
-            });
-            html += `</div>`;
+        if (error) {
+            html += `<div class="sched-loading">${error}</div>`;
+        } else if (games.length === 0) {
+            html += `<div class="sched-loading">No games scheduled for this date.</div>`;
+        } else {
+            if (live.length) {
+                html += `<h3 class="sched-heading">Live</h3>`;
+                html += `<div class="sched-grid">${live.map(renderGame).join('')}</div>`;
+            }
+            if (pre.length) {
+                html += `<h3 class="sched-heading">Upcoming</h3>`;
+                html += `<div class="sched-grid">${pre.map(renderGame).join('')}</div>`;
+            }
+            if (finals.length) {
+                html += `<h3 class="sched-heading">Final</h3>`;
+                html += `<div class="sched-grid">${finals.map(renderGame).join('')}</div>`;
+            }
         }
 
         html += `</div>`;
         container.innerHTML = html;
+        attachNavListeners();
+    }
 
+    function attachNavListeners() {
         document.getElementById('prevDay').addEventListener('click', () => {
-            if (currentDayIndex > 0) { currentDayIndex--; renderSchedule(); }
+            currentDate = new Date(currentDate.getTime() - 86400000);
+            loadSchedule();
         });
         document.getElementById('nextDay').addEventListener('click', () => {
-            if (currentDayIndex < SCHEDULE.length - 1) { currentDayIndex++; renderSchedule(); }
+            currentDate = new Date(currentDate.getTime() + 86400000);
+            loadSchedule();
         });
     }
 
-    renderSchedule();
+    loadSchedule();
 })();

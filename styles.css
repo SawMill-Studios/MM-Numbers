@@ -428,6 +428,67 @@ header .year {
     font-weight: 400;
 }
 
+/* Live game styles */
+.sched-game.live {
+    border-color: #ef4444;
+    border-width: 1.5px;
+}
+
+.sched-game.live .sched-team {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.sched-game.live .score {
+    margin-left: auto;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.sched-live-info {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #ef4444;
+    letter-spacing: 0.05em;
+    margin-top: 0.15rem;
+}
+
+.live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ef4444;
+    animation: pulse-dot 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+.sched-status-label {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.1rem;
+}
+
+.sched-loading {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    padding: 2rem 0;
+}
+
 @media (max-width: 600px) {
     .sched-grid {
         grid-template-columns: 1fr;
