@@ -221,6 +221,34 @@ header .year {
     opacity: 0.8;
 }
 
+/* Friend Square highlight */
+.cell-name.friend-square {
+    background: linear-gradient(135deg, rgba(0, 180, 255, 0.15), rgba(0, 140, 255, 0.08));
+    border: none;
+    box-shadow:
+        inset 0 0 0 2px rgba(0, 180, 255, 0.5),
+        0 0 15px rgba(0, 180, 255, 0.2),
+        0 0 30px rgba(0, 180, 255, 0.1);
+    animation: glowBlue 2.5s ease-in-out infinite;
+    color: #00b4ff;
+    font-weight: 700;
+}
+
+.cell-name.friend-square::after {
+    content: '★';
+    position: absolute;
+    top: 3px;
+    right: 4px;
+    font-size: 0.5rem;
+    color: #00b4ff;
+    opacity: 0.8;
+}
+
+@keyframes glowBlue {
+    0%, 100% { box-shadow: inset 0 0 0 2px rgba(0, 180, 255, 0.5), 0 0 15px rgba(0, 180, 255, 0.2); }
+    50% { box-shadow: inset 0 0 0 2px rgba(0, 180, 255, 0.8), 0 0 25px rgba(0, 180, 255, 0.4), 0 0 50px rgba(0, 180, 255, 0.15); }
+}
+
 @keyframes glow {
     0%, 100% {
         box-shadow:

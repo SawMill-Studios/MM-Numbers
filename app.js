@@ -32,6 +32,7 @@
     ];
 
     const MY_SQUARE = 39; // 1-indexed: row 4, col 9
+    const FRIEND_SQUARE = 19; // Joe G
 
     const board = document.getElementById('board');
 
@@ -75,6 +76,9 @@
             cell.className = 'cell-name';
             if (squareNum === MY_SQUARE) {
                 cell.classList.add('my-square');
+            }
+            if (squareNum === FRIEND_SQUARE) {
+                cell.classList.add('friend-square');
             }
             cell.textContent = NAMES[row][col];
             cell.title = `#${squareNum} — ${NAMES[row][col]}`;
