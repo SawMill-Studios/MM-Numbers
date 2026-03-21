@@ -123,7 +123,16 @@
     async function fetchGames(date) {
         const ncaaUrl = `${API_BASE}/${dateToApi(date)}/all-conf`;
 
-        // Try allorigins.win CORS proxy first
+        // Primary: corsproxy.io
+        try {
+            const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(ncaaUrl)}`);
+            if (res.ok) {
+                const data = await res.json();
+                return (data.games || []).map(g => g.game);
+            }
+        } catch (_) { /* fall through to backup */ }
+
+        // Fallback: allorigins.win
         try {
             const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(ncaaUrl)}`);
             if (res.ok) {
@@ -131,13 +140,8 @@
                 const data = JSON.parse(wrapper.contents);
                 return (data.games || []).map(g => g.game);
             }
-        } catch (_) { /* fall through to backup */ }
-
-        // Fallback: corsproxy.io
-        const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(ncaaUrl)}`);
-        if (!res.ok) return [];
-        const data = await res.json();
-        return (data.games || []).map(g => g.game);
+        } catch (_) {}
+        return [];
     }
 
     function renderGame(game) {
