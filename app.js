@@ -85,4 +85,102 @@
             board.appendChild(cell);
         }
     }
+    // --- Schedule Section ---
+    const SCHEDULE = [
+        {
+            date: 'March 21',
+            label: 'First Round',
+            games: [
+                { seed1: 1, team1: 'Michigan', score1: 95, seed2: 9, team2: 'Saint Louis', score2: 72, status: 'final' },
+                { seed1: 3, team1: 'Michigan State', score1: 77, seed2: 6, team2: 'Louisville', score2: 69, status: 'final' },
+                { seed1: 7, team1: 'Kentucky', score1: 89, seed2: 10, team2: 'Santa Clara', score2: 84, status: 'final', note: 'OT' },
+                { seed1: 5, team1: 'Texas Tech', score1: 91, seed2: 12, team2: 'Akron', score2: 71, status: 'final' },
+                { seed1: 1, team1: 'Arizona', score1: 92, seed2: 16, team2: 'LIU', score2: 58, status: 'final' },
+                { seed1: 3, team1: 'Virginia', score1: 82, seed2: 14, team2: 'Wright State', score2: 73, status: 'final' },
+                { seed1: 1, team1: 'Florida', score1: 114, seed2: 16, team2: 'Prairie View A&M', score2: 55, status: 'final' },
+                { seed1: 4, team1: 'Kansas', score1: 68, seed2: 13, team2: 'Cal Baptist', score2: 60, status: 'final' },
+                { seed1: 2, team1: 'UConn', score1: 82, seed2: 15, team2: 'Furman', score2: 71, status: 'final' },
+                { seed1: 7, team1: 'Miami', score1: 80, seed2: 10, team2: 'Missouri', score2: 66, status: 'final' },
+                { seed1: 1, team1: 'Duke', seed2: 9, team2: 'TCU', time: '5:15 PM ET', status: 'upcoming' },
+                { seed1: 2, team1: 'Houston', seed2: 10, team2: 'Texas A&M', time: '6:10 PM ET', status: 'upcoming' },
+                { seed1: 3, team1: 'Gonzaga', seed2: 11, team2: 'Texas', time: '7:10 PM ET', status: 'upcoming' },
+                { seed1: 3, team1: 'Illinois', seed2: 11, team2: 'VCU', time: '7:50 PM ET', status: 'upcoming' },
+                { seed1: 4, team1: 'Nebraska', seed2: 5, team2: 'Vanderbilt', time: '8:45 PM ET', status: 'upcoming' },
+                { seed1: 4, team1: 'Arkansas', seed2: 12, team2: 'High Point', time: '9:45 PM ET', status: 'upcoming' },
+            ]
+        },
+        {
+            date: 'March 22',
+            label: 'Second Round',
+            games: [
+                { seed1: 7, team1: 'Miami', seed2: 2, team2: 'Purdue', time: '12:10 PM ET', network: 'CBS', status: 'upcoming' },
+                { seed1: 7, team1: 'Kentucky', seed2: 2, team2: 'Iowa State', time: '2:45 PM ET', network: 'CBS', status: 'upcoming' },
+                { seed1: 5, team1: "St. John's", seed2: 4, team2: 'Kansas', time: '5:15 PM ET', network: 'CBS', status: 'upcoming' },
+                { seed1: 6, team1: 'Tennessee', seed2: 3, team2: 'Virginia', time: '6:10 PM ET', network: 'TNT', status: 'upcoming' },
+                { seed1: 9, team1: 'Iowa', seed2: 1, team2: 'Florida', time: '7:10 PM ET', network: 'TBS', status: 'upcoming' },
+                { seed1: 9, team1: 'Utah State', seed2: 1, team2: 'Arizona', time: '7:50 PM ET', network: 'truTV', status: 'upcoming' },
+                { seed1: 7, team1: 'UCLA', seed2: 2, team2: 'UConn', time: '8:45 PM ET', network: 'TNT', status: 'upcoming' },
+                { seed1: 5, team1: 'Texas Tech', seed2: 4, team2: 'Alabama', time: '9:45 PM ET', network: 'TBS', status: 'upcoming' },
+            ]
+        }
+    ];
+
+    let currentDayIndex = 0;
+
+    function renderSchedule() {
+        const container = document.getElementById('schedule');
+        const day = SCHEDULE[currentDayIndex];
+
+        const finals = day.games.filter(g => g.status === 'final');
+        const upcoming = day.games.filter(g => g.status === 'upcoming');
+
+        let html = `<div class="sched">`;
+        html += `<div class="sched-nav">`;
+        html += `<button class="sched-btn" id="prevDay" ${currentDayIndex === 0 ? 'disabled' : ''}>&larr; Prev</button>`;
+        html += `<div class="sched-title"><span class="sched-date">${day.date}</span><span class="sched-round">${day.label}</span></div>`;
+        html += `<button class="sched-btn" id="nextDay" ${currentDayIndex === SCHEDULE.length - 1 ? 'disabled' : ''}>Next &rarr;</button>`;
+        html += `</div>`;
+
+        if (finals.length) {
+            html += `<h3 class="sched-heading">Results</h3>`;
+            html += `<div class="sched-grid">`;
+            finals.forEach(g => {
+                const w1 = g.score1 > g.score2;
+                const note = g.note ? ` <span class="sched-ot">(${g.note})</span>` : '';
+                html += `<div class="sched-game final">`;
+                html += `<span class="sched-team ${w1 ? 'win' : 'loss'}"><span class="seed">(${g.seed1})</span> ${g.team1} <span class="score">${g.score1}</span></span>`;
+                html += `<span class="sched-team ${w1 ? 'loss' : 'win'}"><span class="seed">(${g.seed2})</span> ${g.team2} <span class="score">${g.score2}</span></span>`;
+                if (note) html += `<span class="sched-note">${note}</span>`;
+                html += `</div>`;
+            });
+            html += `</div>`;
+        }
+
+        if (upcoming.length) {
+            html += `<h3 class="sched-heading">${finals.length ? 'Tonight' : 'Games'}</h3>`;
+            html += `<div class="sched-grid">`;
+            upcoming.forEach(g => {
+                const net = g.network ? ` <span class="sched-net">${g.network}</span>` : '';
+                html += `<div class="sched-game upcoming">`;
+                html += `<span class="sched-team"><span class="seed">(${g.seed1})</span> ${g.team1}</span>`;
+                html += `<span class="sched-vs">vs</span>`;
+                html += `<span class="sched-team"><span class="seed">(${g.seed2})</span> ${g.team2}</span>`;
+                html += `<span class="sched-time">${g.time}${net}</span>`;
+                html += `</div>`;
+            });
+            html += `</div>`;
+        }
+
+        html += `</div>`;
+        container.innerHTML = html;
+
+        document.getElementById('prevDay').addEventListener('click', () => {
+            if (currentDayIndex > 0) { currentDayIndex--; renderSchedule(); }
+        });
+        document.getElementById('nextDay').addEventListener('click', () => {
+            if (currentDayIndex < SCHEDULE.length - 1) { currentDayIndex++; renderSchedule(); }
+        });
+    }
+
+    renderSchedule();
 })();

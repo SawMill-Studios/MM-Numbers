@@ -264,6 +264,176 @@ header .year {
     }
 }
 
+/* Schedule */
+.sched {
+    margin-top: 2rem;
+}
+
+.sched-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.sched-title {
+    text-align: center;
+}
+
+.sched-date {
+    display: block;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    color: var(--text);
+    letter-spacing: 0.05em;
+}
+
+.sched-round {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--pink);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 0.15rem;
+}
+
+.sched-btn {
+    background: var(--surface-alt);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    font-family: inherit;
+}
+
+.sched-btn:hover:not(:disabled) {
+    background: var(--border);
+    color: var(--text);
+}
+
+.sched-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.sched-heading {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 0.6rem;
+    margin-top: 1rem;
+}
+
+.sched-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.sched-game {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    position: relative;
+}
+
+.sched-game.final .sched-team {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+}
+
+.sched-game.final .sched-team.win {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.sched-game.final .sched-team.loss {
+    color: var(--text-dim);
+    font-weight: 400;
+}
+
+.sched-game .seed {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    font-weight: 500;
+}
+
+.sched-game.final .sched-team.win .seed {
+    color: var(--text-dim);
+}
+
+.sched-game .score {
+    margin-left: auto;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.sched-game.final .sched-team.loss .score {
+    font-weight: 400;
+}
+
+.sched-note {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    text-align: right;
+}
+
+.sched-ot {
+    color: var(--pink);
+}
+
+.sched-game.upcoming {
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.4rem;
+    font-size: 0.78rem;
+}
+
+.sched-game.upcoming .sched-team {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.sched-vs {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    font-weight: 500;
+}
+
+.sched-time {
+    font-size: 0.65rem;
+    color: var(--green);
+    font-weight: 600;
+    margin-left: auto;
+}
+
+.sched-net {
+    color: var(--text-dim);
+    font-weight: 400;
+}
+
+@media (max-width: 600px) {
+    .sched-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Footer */
 footer {
     text-align: center;
