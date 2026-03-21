@@ -129,7 +129,7 @@
             if (res.ok) {
                 const wrapper = await res.json();
                 const data = JSON.parse(wrapper.contents);
-                return data.games || [];
+                return (data.games || []).map(g => g.game);
             }
         } catch (_) { /* fall through to backup */ }
 
@@ -137,7 +137,7 @@
         const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(ncaaUrl)}`);
         if (!res.ok) return [];
         const data = await res.json();
-        return data.games || [];
+        return (data.games || []).map(g => g.game);
     }
 
     function renderGame(game) {
@@ -148,10 +148,13 @@
         if (state === 'final') {
             const homeScore = parseInt(home.score) || 0;
             const awayScore = parseInt(away.score) || 0;
-            const homeWin = homeScore > awayScore;
+            const homeCls = homeScore >= awayScore ? 'win' : 'loss';
+            const awayCls = awayScore >= homeScore ? 'win' : 'loss';
+            const awaySeed = away.seed ? '(' + away.seed + ')' : '';
+            const homeSeed = home.seed ? '(' + home.seed + ')' : '';
             let html = `<div class="sched-game final">`;
-            html += `<span class="sched-team ${awayWin(homeWin, false)}"><span class="seed">${away.seed ? '(' + away.seed + ')' : ''}</span> ${away.names.short} <span class="score">${away.score}</span></span>`;
-            html += `<span class="sched-team ${awayWin(homeWin, true)}"><span class="seed">${home.seed ? '(' + home.seed + ')' : ''}</span> ${home.names.short} <span class="score">${home.score}</span></span>`;
+            html += `<span class="sched-team ${awayCls}"><span class="seed">${awaySeed}</span> ${away.names.short} <span class="score">${away.score}</span></span>`;
+            html += `<span class="sched-team ${homeCls}"><span class="seed">${homeSeed}</span> ${home.names.short} <span class="score">${home.score}</span></span>`;
             html += `<span class="sched-status-label final-label">Final</span>`;
             html += `</div>`;
             return html;
@@ -176,11 +179,6 @@
         html += `<span class="sched-time">${game.startTime || 'TBD'}</span>`;
         html += `</div>`;
         return html;
-    }
-
-    function awayWin(homeWin, isHome) {
-        if (isHome) return homeWin ? 'win' : 'loss';
-        return homeWin ? 'loss' : 'win';
     }
 
     async function loadSchedule() {
