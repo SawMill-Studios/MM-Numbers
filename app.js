@@ -32,7 +32,7 @@
     ];
 
     const MY_SQUARE = 39; // 1-indexed: row 4, col 9
-    const FRIEND_SQUARE = 19; // Joe G
+    const FRIEND_SQUARE = 78; // Joe G (J&M)
 
     const board = document.getElementById('board');
 
