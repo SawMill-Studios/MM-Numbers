@@ -89,24 +89,16 @@
     const SCHEDULE = [
         {
             date: 'March 21',
-            label: 'First Round',
+            label: 'Second Round',
             games: [
-                { seed1: 1, team1: 'Michigan', score1: 95, seed2: 9, team2: 'Saint Louis', score2: 72, status: 'final' },
-                { seed1: 3, team1: 'Michigan State', score1: 77, seed2: 6, team2: 'Louisville', score2: 69, status: 'final' },
-                { seed1: 7, team1: 'Kentucky', score1: 89, seed2: 10, team2: 'Santa Clara', score2: 84, status: 'final', note: 'OT' },
-                { seed1: 5, team1: 'Texas Tech', score1: 91, seed2: 12, team2: 'Akron', score2: 71, status: 'final' },
-                { seed1: 1, team1: 'Arizona', score1: 92, seed2: 16, team2: 'LIU', score2: 58, status: 'final' },
-                { seed1: 3, team1: 'Virginia', score1: 82, seed2: 14, team2: 'Wright State', score2: 73, status: 'final' },
-                { seed1: 1, team1: 'Florida', score1: 114, seed2: 16, team2: 'Prairie View A&M', score2: 55, status: 'final' },
-                { seed1: 4, team1: 'Kansas', score1: 68, seed2: 13, team2: 'Cal Baptist', score2: 60, status: 'final' },
-                { seed1: 2, team1: 'UConn', score1: 82, seed2: 15, team2: 'Furman', score2: 71, status: 'final' },
-                { seed1: 7, team1: 'Miami', score1: 80, seed2: 10, team2: 'Missouri', score2: 66, status: 'final' },
-                { seed1: 1, team1: 'Duke', seed2: 9, team2: 'TCU', time: '5:15 PM ET', status: 'upcoming' },
-                { seed1: 2, team1: 'Houston', seed2: 10, team2: 'Texas A&M', time: '6:10 PM ET', status: 'upcoming' },
-                { seed1: 3, team1: 'Gonzaga', seed2: 11, team2: 'Texas', time: '7:10 PM ET', status: 'upcoming' },
-                { seed1: 3, team1: 'Illinois', seed2: 11, team2: 'VCU', time: '7:50 PM ET', status: 'upcoming' },
-                { seed1: 4, team1: 'Nebraska', seed2: 5, team2: 'Vanderbilt', time: '8:45 PM ET', status: 'upcoming' },
-                { seed1: 4, team1: 'Arkansas', seed2: 12, team2: 'High Point', time: '9:45 PM ET', status: 'upcoming' },
+                { seed1: 1, team1: 'Michigan', score1: 95, seed2: 9, team2: 'Saint Louis', score2: 72, network: 'CBS', status: 'final' },
+                { seed1: 3, team1: 'Michigan State', score1: 77, seed2: 6, team2: 'Louisville', score2: 69, network: 'CBS', status: 'final' },
+                { seed1: 1, team1: 'Duke', seed2: 9, team2: 'TCU', time: '5:15 PM ET', network: 'CBS', status: 'upcoming' },
+                { seed1: 2, team1: 'Houston', seed2: 10, team2: 'Texas A&M', time: '6:10 PM ET', network: 'TNT', status: 'upcoming' },
+                { seed1: 3, team1: 'Gonzaga', seed2: 11, team2: 'Texas', time: '7:10 PM ET', network: 'TBS', status: 'upcoming' },
+                { seed1: 3, team1: 'Illinois', seed2: 11, team2: 'VCU', time: '7:50 PM ET', network: 'CBS', status: 'upcoming' },
+                { seed1: 4, team1: 'Nebraska', seed2: 5, team2: 'Vanderbilt', time: '8:45 PM ET', network: 'TNT', status: 'upcoming' },
+                { seed1: 4, team1: 'Arkansas', seed2: 12, team2: 'High Point', time: '9:45 PM ET', network: 'TBS', status: 'upcoming' },
             ]
         },
         {
