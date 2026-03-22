@@ -511,6 +511,107 @@ footer strong {
     font-weight: 600;
 }
 
+/* Our Numbers Module */
+.my-numbers {
+    margin-top: 2.5rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.my-numbers-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1.2rem;
+    text-align: center;
+    letter-spacing: 0.02em;
+}
+
+.my-numbers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+}
+
+.player-card {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    transition: border-color 0.2s;
+}
+
+.player-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.darren-card {
+    border-left: 3px solid var(--green);
+}
+
+.joe-card {
+    border-left: 3px solid var(--blue);
+}
+
+.player-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.8rem;
+}
+
+.square-num {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-left: 0.3rem;
+}
+
+.number-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.number-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.round-badge {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.55rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    min-width: 36px;
+    text-align: center;
+    letter-spacing: 0.05em;
+}
+
+.round-badge.pink { background: rgba(255, 77, 141, 0.2); color: var(--pink); }
+.round-badge.blue { background: rgba(77, 141, 255, 0.2); color: var(--blue); }
+.round-badge.green { background: rgba(77, 255, 141, 0.2); color: var(--green); }
+.round-badge.purple { background: rgba(166, 77, 255, 0.2); color: var(--purple); }
+.round-badge.red { background: rgba(255, 77, 77, 0.2); color: var(--red); }
+
+.number-combo {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.number-combo strong {
+    color: var(--text);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .container {
@@ -536,5 +637,9 @@ footer strong {
 
     .cell-edge.left {
         min-width: 40px;
+    }
+
+    .my-numbers-grid {
+        grid-template-columns: 1fr;
     }
 }
