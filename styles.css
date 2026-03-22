@@ -511,6 +511,15 @@ footer strong {
     font-weight: 600;
 }
 
+.footer-logo {
+    display: block;
+    margin: 0 auto 0.9rem;
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+    opacity: 0.95;
+}
+
 /* Our Numbers Module */
 .my-numbers {
     margin-top: 2.5rem;
