@@ -532,7 +532,7 @@ footer strong {
 
 .my-numbers-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 1.2rem;
 }
 
@@ -554,6 +554,23 @@ footer strong {
 
 .joe-card {
     border-left: 3px solid var(--blue);
+}
+
+.nucci-card {
+    border-left: 3px solid var(--red);
+    display: flex;
+    flex-direction: column;
+}
+
+.nucci-loser {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.1rem;
+    color: var(--red);
+    text-align: center;
 }
 
 .player-name {
