@@ -179,9 +179,11 @@ header .year {
 .cell-name {
     background: var(--surface-alt);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
+    gap: 0.28rem;
     padding: 6px 4px;
     font-size: clamp(0.5rem, 1vw, 0.7rem);
     font-weight: 500;
@@ -193,9 +195,47 @@ header .year {
     cursor: default;
 }
 
+.cell-name-text {
+    display: block;
+}
+
+.cell-win-pills {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 14px;
+}
+
+.win-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.08rem 0.32rem;
+    border-radius: 999px;
+    font-size: 0.45rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1;
+    border: 1px solid currentColor;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.win-pill.pink { background: var(--pink-bg); color: var(--pink); }
+.win-pill.blue { background: var(--blue-bg); color: var(--blue); }
+.win-pill.green { background: var(--green-bg); color: var(--green); }
+.win-pill.purple { background: var(--purple-bg); color: var(--purple); }
+.win-pill.red { background: var(--red-bg); color: var(--red); }
+
 .cell-name:hover {
     background: #22223a;
     z-index: 2;
+}
+
+.cell-name.has-win {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 /* My Square highlight */

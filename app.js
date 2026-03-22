@@ -1,6 +1,7 @@
 (() => {
     const ROUNDS = ['pink', 'blue', 'green', 'purple', 'red'];
     const ROUND_LABELS = ['R32', 'S16', 'E8', 'F4', 'FIN'];
+    const ROUND_TITLES = ['Second Round', 'Sweet 16', 'Elite 8', 'Final Four', 'National Championship'];
 
     const TOP = [
         [3,4,0,5,2,1,7,6,9,8],
@@ -33,8 +34,10 @@
 
     const MY_SQUARE = 39; // 1-indexed: row 4, col 9
     const FRIEND_SQUARE = 78; // Joe G (J&M)
+    const WIN_TRACKING_START = new Date(2026, 2, 20); // March 20, 2026
 
     const board = document.getElementById('board');
+    const squareEls = new Map();
 
     // Corner cell
     const corner = document.createElement('div');
@@ -80,11 +83,22 @@
             if (squareNum === FRIEND_SQUARE) {
                 cell.classList.add('friend-square');
             }
-            cell.textContent = NAMES[row][col];
+
+            const name = document.createElement('span');
+            name.className = 'cell-name-text';
+            name.textContent = NAMES[row][col];
+
+            const winPills = document.createElement('div');
+            winPills.className = 'cell-win-pills';
+
+            cell.appendChild(name);
+            cell.appendChild(winPills);
             cell.title = `#${squareNum} — ${NAMES[row][col]}`;
             board.appendChild(cell);
+            squareEls.set(squareNum, { cell, winPills, name: NAMES[row][col] });
         }
     }
+
     // --- Schedule Section (Live API) ---
     const API_BASE = 'https://ncaa-api.henrygd.me/scoreboard/basketball-men/d1';
 
@@ -96,6 +110,16 @@
         { dates: [[4,5],[4,6]], label: 'Final Four' },
         { dates: [[4,7]], label: 'National Championship' },
     ];
+
+    const ROUND_INDEX_BY_TITLE = {
+        'Second Round': 0,
+        'Sweet 16': 1,
+        'Elite 8': 2,
+        'Final Four': 3,
+        'National Championship': 4,
+    };
+
+    const scoreboardCache = new Map();
 
     function getRoundLabel(date) {
         const m = date.getMonth() + 1;
@@ -116,34 +140,128 @@
         return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())}`;
     }
 
-    let currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-    let refreshTimer = null;
+    function addDays(date, days) {
+        const next = new Date(date);
+        next.setDate(next.getDate() + days);
+        return next;
+    }
+
+    function getDatesThroughToday(startDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const dates = [];
+        let cursor = new Date(startDate);
+        cursor.setHours(0, 0, 0, 0);
+
+        while (cursor <= today) {
+            dates.push(new Date(cursor));
+            cursor = addDays(cursor, 1);
+        }
+
+        return dates;
+    }
+
+    function buildScoreboardUrls(date) {
+        const ncaaUrl = `${API_BASE}/${dateToApi(date)}/all-conf`;
+        return [
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(ncaaUrl)}`,
+            `https://corsproxy.io/?${encodeURIComponent(ncaaUrl)}`,
+            `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(ncaaUrl)}`,
+        ];
+    }
+
+    async function fetchScoreboard(date) {
+        const key = dateToApi(date);
+        if (scoreboardCache.has(key)) return scoreboardCache.get(key);
+
+        const fetchPromise = (async () => {
+            for (const url of buildScoreboardUrls(date)) {
+                try {
+                    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+                    if (res.ok) {
+                        return await res.json();
+                    }
+                } catch (_) {
+                    // try next proxy
+                }
+            }
+            return { games: [] };
+        })();
+
+        scoreboardCache.set(key, fetchPromise);
+        return fetchPromise;
+    }
 
     async function fetchGames(date) {
-        const ncaaUrl = `${API_BASE}/${dateToApi(date)}/all-conf`;
+        const data = await fetchScoreboard(date);
+        return (data.games || [])
+            .map(g => g.game)
+            .filter(g => g?.championshipId && g?.championshipGame?.round);
+    }
 
-        // The NCAA API doesn't require CORS headers when accessed directly
-        // Try direct first (works if served from same-origin or API allows it)
-        const proxies = [
-            (url) => url, // direct
-            (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-            (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-        ];
+    function getSquareForDigits(roundIndex, winnerDigit, loserDigit) {
+        const row = LEFT[roundIndex].findIndex(n => n === loserDigit);
+        const col = TOP[roundIndex].findIndex(n => n === winnerDigit);
 
-        for (const proxy of proxies) {
-            try {
-                const res = await fetch(proxy(ncaaUrl), { signal: AbortSignal.timeout(5000) });
-                if (res.ok) {
-                    const data = await res.json();
-                    return (data.games || [])
-                        .map(g => g.game)
-                        .filter(g => g?.championshipId && g?.championshipGame?.round);
+        if (row === -1 || col === -1) return null;
+        return row * 10 + col + 1;
+    }
+
+    function createWinPill(roundIndex, gameTitle) {
+        const pill = document.createElement('span');
+        pill.className = `win-pill ${ROUNDS[roundIndex]}`;
+        pill.textContent = 'Win';
+        pill.title = gameTitle ? `${ROUND_TITLES[roundIndex]} — ${gameTitle}` : ROUND_TITLES[roundIndex];
+        return pill;
+    }
+
+    async function loadCompletedWins() {
+        try {
+            const winsBySquare = new Map();
+            const dates = getDatesThroughToday(WIN_TRACKING_START);
+            const allGames = await Promise.all(dates.map(fetchGames));
+
+            allGames.flat().forEach(game => {
+                if (game.gameState !== 'final') return;
+
+                const roundTitle = game.championshipGame?.round?.title;
+                const roundIndex = ROUND_INDEX_BY_TITLE[roundTitle];
+                if (roundIndex === undefined) return;
+
+                const homeScore = parseInt(game.home?.score, 10);
+                const awayScore = parseInt(game.away?.score, 10);
+                if (Number.isNaN(homeScore) || Number.isNaN(awayScore) || homeScore === awayScore) return;
+
+                const winnerScore = Math.max(homeScore, awayScore);
+                const loserScore = Math.min(homeScore, awayScore);
+                const squareNum = getSquareForDigits(roundIndex, winnerScore % 10, loserScore % 10);
+                if (!squareNum) return;
+
+                if (!winsBySquare.has(squareNum)) winsBySquare.set(squareNum, []);
+                winsBySquare.get(squareNum).push({
+                    roundIndex,
+                    title: game.title || `${game.away?.names?.short || 'Away'} vs ${game.home?.names?.short || 'Home'}`,
+                });
+            });
+
+            squareEls.forEach(({ cell, winPills, name }, squareNum) => {
+                winPills.innerHTML = '';
+                const wins = winsBySquare.get(squareNum) || [];
+                if (wins.length) {
+                    cell.classList.add('has-win');
+                    cell.title = `#${squareNum} — ${name} — ${wins.length} win${wins.length === 1 ? '' : 's'} so far`;
+                    wins
+                        .sort((a, b) => a.roundIndex - b.roundIndex)
+                        .forEach(win => winPills.appendChild(createWinPill(win.roundIndex, win.title)));
+                } else {
+                    cell.classList.remove('has-win');
+                    cell.title = `#${squareNum} — ${name}`;
                 }
-            } catch (_) { /* try next proxy */ }
+            });
+        } catch (_) {
+            // Keep the board usable even if win hydration fails.
         }
-        return [];
     }
 
     function renderGame(game) {
@@ -187,6 +305,10 @@
         return html;
     }
 
+    let currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    let refreshTimer = null;
+
     async function loadSchedule() {
         const container = document.getElementById('schedule');
         const dateStr = formatDateNice(currentDate);
@@ -217,6 +339,7 @@
             try {
                 const games = await fetchGames(currentDate);
                 renderGames(games, formatDateNice(currentDate), getRoundLabel(currentDate));
+                await loadCompletedWins();
             } catch (_) { /* silent fail on refresh */ }
         }, 30000);
     }
@@ -271,4 +394,5 @@
     }
 
     loadSchedule();
+    loadCompletedWins();
 })();
