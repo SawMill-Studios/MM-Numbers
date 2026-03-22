@@ -600,6 +600,14 @@ footer strong {
 .round-badge.purple { background: rgba(166, 77, 255, 0.2); color: var(--purple); }
 .round-badge.red { background: rgba(255, 77, 77, 0.2); color: var(--red); }
 
+.prize {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--green);
+    min-width: 65px;
+}
+
 .number-combo {
     font-family: 'Inter', sans-serif;
     font-size: 0.8rem;
