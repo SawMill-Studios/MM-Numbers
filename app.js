@@ -137,7 +137,9 @@
                 const res = await fetch(proxy(ncaaUrl), { signal: AbortSignal.timeout(5000) });
                 if (res.ok) {
                     const data = await res.json();
-                    return (data.games || []).map(g => g.game);
+                    return (data.games || [])
+                        .map(g => g.game)
+                        .filter(g => g?.championshipId && g?.championshipGame?.round);
                 }
             } catch (_) { /* try next proxy */ }
         }
