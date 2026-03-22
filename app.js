@@ -123,24 +123,24 @@
     async function fetchGames(date) {
         const ncaaUrl = `${API_BASE}/${dateToApi(date)}/all-conf`;
 
-        // Primary: corsproxy.io
-        try {
-            const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(ncaaUrl)}`);
-            if (res.ok) {
-                const data = await res.json();
-                return (data.games || []).map(g => g.game);
-            }
-        } catch (_) { /* fall through to backup */ }
+        // The NCAA API doesn't require CORS headers when accessed directly
+        // Try direct first (works if served from same-origin or API allows it)
+        const proxies = [
+            (url) => url, // direct
+            (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+            (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        ];
 
-        // Fallback: allorigins.win
-        try {
-            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(ncaaUrl)}`);
-            if (res.ok) {
-                const wrapper = await res.json();
-                const data = JSON.parse(wrapper.contents);
-                return (data.games || []).map(g => g.game);
-            }
-        } catch (_) {}
+        for (const proxy of proxies) {
+            try {
+                const res = await fetch(proxy(ncaaUrl), { signal: AbortSignal.timeout(5000) });
+                if (res.ok) {
+                    const data = await res.json();
+                    return (data.games || []).map(g => g.game);
+                }
+            } catch (_) { /* try next proxy */ }
+        }
         return [];
     }
 
